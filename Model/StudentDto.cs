@@ -2,7 +2,7 @@
 
 namespace SIS.Model
 {
-    public class Student : TimeEntity
+    public class StudentDto : TimeEntity
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -12,15 +12,15 @@ namespace SIS.Model
         public int Gender { get; set; }
         public string Address { get; set; }
         public string Phoneno { get; set; }
-        public string email { get; set; }
-        public string ParentName { get; set; }
-        public string ParentContactNo { get; set; }
-        public string ParentContactEmail { get; set; }
+        public string? email { get; set; }
+        public string? ParentName { get; set; }
+        public string? ParentContactNo { get; set; }
+        public string? ParentContactEmail { get; set; }
 
         //ACADAMIC INFORMATION
         public int Class { get; set; }
         public int Section { get; set; }
         public DateTime DateOfAdmission { get; set; }
-        public string PreSchool { get; set; }
+        public string? PreSchool { get; set; }
     }
 }
