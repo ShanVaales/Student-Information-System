@@ -11,5 +11,6 @@ namespace SIS.SISContext
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<TeacherSubjectCode> TeachersSubjectCode { get; set; }
         public DbSet<Principal> Principals { get; set; }
+        public DbSet<AspUser> AspUsers { get; set; }
     }
 }
