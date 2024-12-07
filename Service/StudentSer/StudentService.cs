@@ -1,9 +1,15 @@
 ﻿using SIS.Model;
+using SIS.SISContext;
 
 namespace SIS.Service.Student
 {
     public class StudentService : IStudentService
     {
+        private readonly SISDbContext _context;
+        public StudentService(SISDbContext context)
+        {
+            _context = context;
+        }
         public Task<int> Save(StudentDto Dto)
         {
             return Task.FromResult(0);
