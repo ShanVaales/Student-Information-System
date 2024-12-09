@@ -23,6 +23,13 @@ namespace SIS.Service.Account
             return result;
         }
 
+        public async Task<int> LoginInfoSave(Login Dto)
+        {
+            _context.Logins.Add(Dto);
+            await _context.SaveChangesAsync();
+            return 1;
+        }
+
 
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SIS.Model;
 using SIS.Service.Account;
+using SIS.SISContext;
+using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace SIS.Controllers
@@ -10,8 +12,11 @@ namespace SIS.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly IAccountsService _accountsService;
-        public AccountsController(IAccountsService accountsService)
+        private readonly SISDbContext _context;
+
+        public AccountsController(IAccountsService accountsService, SISDbContext context_)
         {
+            _context = context_;
             _accountsService = accountsService;
         }
         //public static AspUser Data = new AspUser();
@@ -39,6 +44,9 @@ namespace SIS.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult<AspUser>> RegisterUser([FromBody] RegisterUserDto user)
         {
+            if(_context.AspUsers.Any(x => x.Username == user.Username)){
+                return BadRequest("User Already Exists");
+            }
             // Check if the password is null or empty
             if (string.IsNullOrWhiteSpace(user.Password))
                 return BadRequest("Password is required.");
@@ -92,11 +100,21 @@ namespace SIS.Controllers
 
         private bool VerifyPassword(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            using(HMAC hMAC = new HMACSHA512())
+            using(HMAC hMAC = new HMACSHA512(passwordSalt))
             {
                 var computedHash = hMAC.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return computedHash.SequenceEqual(passwordHash);
             }
+        }
+
+        private string GenerateToken (AspUser user)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name,user.Username)
+            };
+            //var key = 
+            return string.Empty;
         }
         
 
