@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SIS.Model;
+using SIS.Service.Account;
 using System.Security.Cryptography;
 
 namespace SIS.Controllers
@@ -8,6 +9,11 @@ namespace SIS.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
+        private readonly IAccountsService _accountsService;
+        public AccountsController(IAccountsService accountsService)
+        {
+            _accountsService = accountsService;
+        }
         //public static AspUser Data = new AspUser();
         //[HttpPost("Register")]
         //public async Task<ActionResult<AspUser>> RegisterUser([FromBody] RegisterUserDto User)
@@ -42,10 +48,37 @@ namespace SIS.Controllers
 
             // Populate the Data object
             Data.Username = user.Username;
+            Data.FirstName = user.FirstName;
+            Data.LastName = user.LastName;
             Data.PasswordHash = passwordHash;
             Data.PasswordSalt = passwordSalt;
-
+            Data.UserId = Guid.NewGuid().ToString();
+            Data.IsTwoFactor = user.IsTwoFactor;
+            var result = _accountsService.SaveUser(Data);
             return Ok(Data);
+        }
+
+        [HttpPost("Login")]
+
+        public ActionResult<AspUser> Login (string username , string password)
+        {
+            var checkusername = _accountsService.GetByIdUserName(username).Result;
+            if(checkusername != null)
+            {
+                var r = VerifyPassword(password,checkusername.PasswordHash, checkusername.PasswordSalt);
+                if(r == false)
+                {
+                    return BadRequest("Invalid Password");
+                }
+                else
+                {
+                    return Ok(checkusername);
+                }
+            }
+            else
+            {
+                return BadRequest("No User Found");
+            }
         }
 
         private void PasswordHashing(string password, out byte[] passwordHash, out byte[] passwordSalt)
@@ -56,6 +89,18 @@ namespace SIS.Controllers
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
+
+        private bool VerifyPassword(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using(HMAC hMAC = new HMACSHA512())
+            {
+                var computedHash = hMAC.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(passwordHash);
+            }
+        }
+        
+
+        
 
     }
 }
