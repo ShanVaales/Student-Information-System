@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SIS.Model;
 using SIS.Service.Account;
 using SIS.SISContext;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
@@ -13,10 +15,12 @@ namespace SIS.Controllers
     {
         private readonly IAccountsService _accountsService;
         private readonly SISDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AccountsController(IAccountsService accountsService, SISDbContext context_)
+        public AccountsController(IAccountsService accountsService, SISDbContext context_,IConfiguration configuration_)
         {
             _context = context_;
+            _configuration = configuration_;
             _accountsService = accountsService;
         }
         //public static AspUser Data = new AspUser();
@@ -68,7 +72,7 @@ namespace SIS.Controllers
 
         [HttpPost("Login")]
 
-        public ActionResult<AspUser> Login (string username , string password)
+        public ActionResult<string> Login (string username , string password)
         {
             var checkusername = _accountsService.GetByIdUserName(username).Result;
             if(checkusername != null)
@@ -80,6 +84,8 @@ namespace SIS.Controllers
                 }
                 else
                 {
+                    string Token = GenerateToken(checkusername);
+                    return Ok(Token);
                     return Ok(checkusername);
                 }
             }
@@ -113,8 +119,15 @@ namespace SIS.Controllers
             {
                 new Claim(ClaimTypes.Name,user.Username)
             };
-            //var key = 
-            return string.Empty;
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(5),
+                signingCredentials: cred);
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
         }
         
 
