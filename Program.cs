@@ -1,5 +1,6 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using SIS.Service.Account;
 using SIS.SISContext;
 using System.Data;
 
@@ -19,6 +20,9 @@ builder.Services.AddScoped<IDbConnection>(sp =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     return new SqlConnection(connectionString);
 });
+
+//Services Mapping
+builder.Services.AddScoped<IAccountsService,AccountsService>();
 
 var app = builder.Build();
 

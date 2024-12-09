@@ -16,8 +16,11 @@ namespace SIS.Model
 
     public class RegisterUserDto
     {
+        public string FirstName {  set; get; } = string.Empty;
+        public string LastName { set; get; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public bool IsTwoFactor { get; set; }
 
     }
 }
